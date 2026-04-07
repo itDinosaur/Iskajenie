@@ -36,13 +36,18 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   // Инициализация игры
   Future<void> _initializeGame() async {
-    // Если игра уже началась, загружаем сохранение
-    if (widget.gameModel.isGameStarted) {
+    // Проверяем, есть ли сохранение для этого слота
+    final prefs = await SharedPreferences.getInstance();
+    final gameJson = prefs.getString('game_save_${widget.gameModel.slotId}');
+    
+    if (gameJson != null) {
+      // Есть сохранение - загружаем игру без предыстории
       await _loadGame();
     } else {
-      // Новая игра - показываем предысторию
+      // Нет сохранения - новая игра, показываем предысторию
       _showStory();
     }
+    
     setState(() {
       _isInitialized = true;
     });
