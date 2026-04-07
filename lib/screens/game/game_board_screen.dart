@@ -73,12 +73,18 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   // Показ экрана предыстории
   void _showStory() {
-    Navigator.pushReplacement(
+    // Используем push вместо pushReplacement, чтобы можно было вернуться
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => StoryScreen(gameModel: widget.gameModel),
       ),
-    );
+    ).then((_) {
+      // Когда история закрыта, начинаем игру
+      if (mounted) {
+        startGame();
+      }
+    });
   }
 
   // Генерация начальной карты для компании "Мрачный бункер"
