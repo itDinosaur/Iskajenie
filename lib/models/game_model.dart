@@ -189,4 +189,16 @@ class GameModel {
     isGameStarted = true;
     visitedLocationIds.add(startLocationId);
   }
+  
+  // Метод для добавления новой локации на карту
+  void addLocationToMap(Location location) {
+    if (!mapLocations.any((loc) => loc.id == location.id)) {
+      mapLocations.add(location);
+    }
+  }
+  
+  // Метод для перемещения в локацию
+  void moveToLocation(String locationId) {
+    visitLocation(locationId);
+  }
 }
