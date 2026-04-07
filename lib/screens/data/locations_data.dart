@@ -4,21 +4,15 @@
 
 import 'package:flutter/material.dart';
 
-// Перечисление типов локаций для удобства логики
-enum LocationType {
-  start,       // Стартовая локация
-  crossroad,   // Перекресток (развилка)
-  normal,      // Обычная проходная локация
-  deadEnd,     // Тупиковая локация
-  checkRequired // Локация, требующая проверки навыка
-}
+// Мы НЕ создаем здесь свой enum LocationType, а используем тот, что в models/location.dart
+// Это предотвращает конфликт имен при импорте
 
 // Класс, описывающий шаблон локации (статические данные)
 class LocationTemplate {
   final String id;              // Уникальный идентификатор локации
   final String name;            // Название локации
   final String description;     // Описание для игрока
-  final LocationType type;      // Тип локации
+  final String type;            // Тип локации как строка ('start', 'crossroad', 'normal', 'deadEnd', 'checkRequired')
   final IconData icon;          // Иконка для отображения на карте
   final String? imagePath;      // Путь к картинке (если есть)
   final String? checkMessage;   // Текст проверки навыка (если требуется)
@@ -42,7 +36,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'metal_corridor',
     name: 'Металлический проход',
     description: 'Длинный коридор с металлическими стенами. Слышен гул вентиляции.',
-    type: LocationType.start,
+    type: 'start',
     icon: Icons.tunnel,
     imagePath: 'assets/images/metal_corridor.png', // Место под будущую картинку
   ),
@@ -52,7 +46,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'bloody_crossroad',
     name: 'Кровавый перекресток',
     description: 'Пересечение тоннелей. На стенах следы борьбы и засохшая кровь.',
-    type: LocationType.crossroad,
+    type: 'crossroad',
     icon: Icons.call_split,
   ),
 
@@ -61,7 +55,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'ladder',
     name: 'Лестница',
     description: 'Ржавая металлическая лестница, ведущая вверх или вниз.',
-    type: LocationType.normal,
+    type: 'normal',
     icon: Icons.stairs,
   ),
 
@@ -70,7 +64,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'dead_passage',
     name: 'Тупиковый проход',
     description: 'Коридор упирается в завал. Дальше пути нет.',
-    type: LocationType.deadEnd,
+    type: 'deadEnd',
     icon: Icons.block,
   ),
 
@@ -79,7 +73,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'service_tunnel',
     name: 'Запасной туннель',
     description: 'Узкий служебный туннель с проводами и трубами.',
-    type: LocationType.normal,
+    type: 'normal',
     icon: Icons.settings_input_component,
   ),
 
@@ -88,7 +82,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'tech_room',
     name: 'Техническое помещение',
     description: 'Комната с серверными шкафами и щитами управления.',
-    type: LocationType.normal,
+    type: 'normal',
     icon: Icons.memory,
   ),
 
@@ -97,7 +91,7 @@ const List<LocationTemplate> bunkerLocations = [
     id: 'cleaner_closet',
     name: 'Кладовая уборщика',
     description: 'Маленькое помещение с инвентарем. Дверь заклинило.',
-    type: LocationType.checkRequired,
+    type: 'checkRequired',
     icon: Icons.cleaning_services,
     checkMessage: 'Требуется сила, чтобы выбить дверь (Сложность: 5)',
   ),
