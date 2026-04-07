@@ -98,13 +98,12 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   // Генерация начальной карты для компании "Мрачный бункер"
   // По правилам: 
-  // 1. Всегда начинаем с "Металлического прохода"
-  // 2. Вторая локация всегда "Кровавый перекресток"
-  // 3. Остальные 5 локаций выбираются случайно из оставшихся
+  // 1. Всегда начинаем только с "Металлического прохода"
+  // 2. Остальные локации открываются постепенно при исследовании
   List<Location> _generateInitialMap() {
     List<Location> mapLocations = [];
     
-    // 1. Стартовая локация - Металлический проход (всегда первая)
+    // 1. Стартовая локация - Металлический проход (всегда первая и единственная в начале)
     final startTemplate = getLocationTemplate('metal_corridor');
     mapLocations.add(Location(
       id: startTemplate.id,
@@ -114,39 +113,6 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       difficulty: 1,
       imageUrl: startTemplate.imagePath ?? '',
     ));
-    
-    // 2. Вторая обязательная локация - Кровавый перекресток (всегда вторая)
-    final crossroadTemplate = getLocationTemplate('bloody_crossroad');
-    mapLocations.add(Location(
-      id: crossroadTemplate.id,
-      name: crossroadTemplate.name,
-      description: crossroadTemplate.description,
-      locationType: _convertLocationType(crossroadTemplate.type),
-      difficulty: 2,
-      imageUrl: crossroadTemplate.imagePath ?? '',
-    ));
-    
-    // 3. Оставшиеся 5 локаций выбираем случайно из доступных
-    // Исключаем уже добавленные (metal_corridor и bloody_crossroad)
-    final availableLocations = bunkerLocations.where((loc) => 
-      loc.id != 'metal_corridor' && loc.id != 'bloody_crossroad'
-    ).toList();
-    
-    // Перемешиваем и берем первые 5
-    availableLocations.shuffle(math.Random());
-    final selectedLocations = availableLocations.take(5).toList();
-    
-    // Добавляем их на карту
-    for (var template in selectedLocations) {
-      mapLocations.add(Location(
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        locationType: _convertLocationType(template.type),
-        difficulty: template.type == 'checkRequired' ? 5 : 3,
-        imageUrl: template.imagePath ?? '',
-      ));
-    }
     
     return mapLocations;
   }

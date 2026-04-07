@@ -3,10 +3,14 @@
 // Показывает описание локации и кнопки взаимодействия
 
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/game_model.dart';
 import '../../models/location.dart';
+import '../data/locations_data.dart';
 
-class LocationDetailScreen extends StatelessWidget {
+class LocationDetailScreen extends StatefulWidget {
   final Location location;
   final GameModel gameModel;
 
@@ -15,6 +19,28 @@ class LocationDetailScreen extends StatelessWidget {
     required this.location,
     required this.gameModel,
   });
+
+  @override
+  State<LocationDetailScreen> createState() => _LocationDetailScreenState();
+}
+
+class _LocationDetailScreenState extends State<LocationDetailScreen> {
+  late GameModel _gameModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _gameModel = widget.gameModel;
+  }
+
+  // Сохранение игры
+  Future<void> _saveGame() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'game_save_${_gameModel.slotId}',
+      json.encode(_gameModel.toJson()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -290,21 +316,180 @@ class LocationDetailScreen extends StatelessWidget {
     );
   }
 
-  // Диалог исследования
+  // Диалог исследования - добавляет новую локацию на карту
   void _showExploreDialog(BuildContext context) {
+    // Если это Металлический проход, то открываем Кровавый перекресток
+    if (widget.location.id == 'metal_corridor') {
+      _addBloodyCrossroad();
+      return;
+    }
+    
+    // Если это Кровавый перекресток, то добавляем 3 случайные локации
+    if (widget.location.id == 'bloody_crossroad') {
+      _addRandomLocationsFromCrossroad();
+      return;
+    }
+    
+    // Для остальных локаций - просто сообщение
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey.shade800,
         title: const Text('Исследование', style: TextStyle(color: Colors.white)),
         content: const Text(
-          'Вы внимательно осматриваете локацию в поисках полезных предметов или тайн...',
+          'Вы внимательно осматриваете локацию. Здесь пока нечего исследовать.',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Закрыть', style: TextStyle(color: Colors.white54)),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Добавление Кровавого перекрестка
+  void _addBloodyCrossroad() {
+    final crossroadTemplate = getLocationTemplate('bloody_crossroad');
+    
+    // Проверяем, есть ли уже эта локация на карте
+    final exists = _gameModel.mapLocations.any((loc) => loc.id == crossroadTemplate.id);
+    
+    if (!exists) {
+      final newLocation = Location(
+        id: crossroadTemplate.id,
+        name: crossroadTemplate.name,
+        description: crossroadTemplate.description,
+        locationType: LocationType.underground,
+        difficulty: 2,
+        imageUrl: crossroadTemplate.imagePath ?? '',
+      );
+      
+      setState(() {
+        _gameModel.addLocationToMap(newLocation);
+        _gameModel.moveToLocation(newLocation.id);
+      });
+      
+      _saveGame();
+      
+      // Показываем сообщение и закрываем текущий экран
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.grey.shade800,
+          title: const Text('Новая локация!', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Вы вышли на Кровавый перекресток. Отсюда расходятся три тоннеля...',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Закрываем диалог
+                Navigator.pop(context); // Закрываем экран локации
+              },
+              child: const Text('Продолжить', style: TextStyle(color: Colors.purpleAccent)),
+            ),
+          ],
+        ),
+      ).then((_) {
+        // После закрытия диалога обновляем карту
+        setState(() {});
+      });
+    }
+  }
+  
+  // Добавление 3 случайных локаций из перекрестка
+  void _addRandomLocationsFromCrossroad() {
+    // Получаем все доступные локации кроме уже добавленных
+    final existingIds = _gameModel.mapLocations.map((loc) => loc.id).toList();
+    
+    final availableLocations = bunkerLocations.where((loc) => 
+      !existingIds.contains(loc.id) && 
+      loc.id != 'metal_corridor' && 
+      loc.id != 'bloody_crossroad'
+    ).toList();
+    
+    // Перемешиваем и берем 3 случайные
+    availableLocations.shuffle(math.Random());
+    final selectedLocations = availableLocations.take(3).toList();
+    
+    if (selectedLocations.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.grey.shade800,
+          title: const Text('Нет путей', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Все возможные пути уже исследованы.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Закрыть', style: TextStyle(color: Colors.white54)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    
+    // Добавляем новые локации на карту
+    for (var template in selectedLocations) {
+      final newLocation = Location(
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        locationType: LocationType.underground,
+        difficulty: template.type == 'checkRequired' ? 5 : 3,
+        imageUrl: template.imagePath ?? '',
+      );
+      
+      _gameModel.addLocationToMap(newLocation);
+    }
+    
+    setState(() {});
+    _saveGame();
+    
+    // Показываем сообщение о новых локациях
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey.shade800,
+        title: const Text('Новые пути открыты!', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Из перекрестка ведут три тоннеля:',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 12),
+            ...selectedLocations.map((loc) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Icon(Icons.circle, size: 8, color: Colors.purpleAccent),
+                  const SizedBox(width: 8),
+                  Text(loc.name, style: const TextStyle(color: Colors.white)),
+                ],
+              ),
+            )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Закрываем диалог
+              Navigator.pop(context); // Закрываем экран локации
+            },
+            child: const Text('Продолжить', style: TextStyle(color: Colors.purpleAccent)),
           ),
         ],
       ),
