@@ -111,7 +111,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       description: startTemplate.description,
       locationType: _convertLocationType(startTemplate.type),
       difficulty: 1,
-      imageUrl: startTemplate.imagePath ?? '',
+      imageUrl: startTemplate.imagePath ?? '', // Если картинки нет, пустая строка
     ));
     
     return mapLocations;

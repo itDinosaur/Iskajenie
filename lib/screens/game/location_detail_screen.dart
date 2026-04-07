@@ -367,7 +367,7 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
         description: crossroadTemplate.description,
         locationType: LocationType.underground,
         difficulty: 2,
-        imageUrl: crossroadTemplate.imagePath ?? '',
+        imageUrl: crossroadTemplate.imagePath ?? '', // Если картинки нет, пустая строка
       );
       
       setState(() {
@@ -449,7 +449,7 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
         description: template.description,
         locationType: LocationType.underground,
         difficulty: template.type == 'checkRequired' ? 5 : 3,
-        imageUrl: template.imagePath ?? '',
+        imageUrl: template.imagePath ?? '', // Если картинки нет, пустая строка
       );
       
       _gameModel.addLocationToMap(newLocation);
