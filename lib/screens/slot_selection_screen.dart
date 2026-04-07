@@ -122,7 +122,7 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey.shade850,
+        backgroundColor: Colors.grey.shade800,
         title: const Text('Новая партия', style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
