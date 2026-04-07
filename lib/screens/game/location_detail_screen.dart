@@ -26,6 +26,9 @@ class LocationDetailScreen extends StatefulWidget {
 
 class _LocationDetailScreenState extends State<LocationDetailScreen> {
   late GameModel _gameModel;
+  
+  // Геттер для удобного доступа к локации из виджета
+  Location get location => widget.location;
 
   @override
   void initState() {
