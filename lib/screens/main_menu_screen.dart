@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart'; // Подключаем библиотеку Flutter для создания интерфейса
 import '../widgets/menu_button.dart'; // Подключаем наш виджет красивой кнопки
 import 'slot_selection_screen.dart'; // Подключаем экран выбора слотов
+import 'settings_screen.dart'; // Подключаем экран настроек
 // В будущем здесь будут импорты других экранов:
 // import 'characters_screen.dart';
-// import 'settings_screen.dart';
 
 // MainMenuScreen - это виджет главного меню
 // Используем StatefulWidget, потому что меню может меняться (например, показывать разные состояния)
@@ -209,15 +209,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   // Функция навигации на экран настроек
   void _navigateToSettings() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Экран настроек в разработке!'),
-        backgroundColor: Colors.deepPurple,
-        duration: Duration(seconds: 2),
-      ),
+    // Переходим на экран настроек
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
-    
-    // В будущем:
-    // Navigator.pushNamed(context, '/settings');
   }
 }
