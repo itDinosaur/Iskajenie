@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'party_setup_screen.dart';
-import '../game/game_board_screen.dart';
+import 'game/game_board_screen.dart';
 import '../../models/game_model.dart';
 
 // Модель данных для слота сохранения
@@ -211,7 +211,7 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
         MaterialPageRoute(
           builder: (context) => GameBoardScreen(
             gameModel: GameModel(
-              slotId: slot.id,
+              slotId: slot.id.toString(),
               companyId: 1, // Будет загружено из сохранения
               playerCount: 1,
               difficulty: 1,
