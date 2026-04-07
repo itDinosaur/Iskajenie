@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'party_setup_screen.dart';
+import '../game/game_board_screen.dart';
+import '../../models/game_model.dart';
 
 // Модель данных для слота сохранения
 class GameSlot {
@@ -133,6 +135,13 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          tooltip: 'Вернуться в меню',
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           // Кнопка очистки всех сохранений
           IconButton(
@@ -196,13 +205,21 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
   void _handleSlotTap(GameSlot slot) {
     if (slot.isOccupied) {
       // Если слот занят, загружаем партию
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Загрузка партии: ${slot.saveName}'),
-          backgroundColor: Colors.green,
+      // Переход к экрану игры с загрузкой сохранения
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameBoardScreen(
+            gameModel: GameModel(
+              slotId: slot.id,
+              companyId: 1, // Будет загружено из сохранения
+              playerCount: 1,
+              difficulty: 1,
+              selectedCharacterIds: [],
+            ),
+          ),
         ),
       );
-      // В будущем здесь будет переход к экрану игры
     } else {
       // Если слот свободен, просим ввести имя
       _showCreateGameDialog(slot);

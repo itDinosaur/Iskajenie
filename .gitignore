@@ -1,62 +1,74 @@
-# Dependencies
-.pub/
-.buildlog
-.flutter-plugins
-.flutter-plugin-dependencies
-.packages
-
-# Build outputs
+```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+dist/
 build/
-**/ios/.generated/
-**/macos/.generated/
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+.venv/
+venv/
+node_modules/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
 
 # Environment
 .env
 .env.local
-.env.*
-!.env.example
+*.env.*
 
-# Logs
-*.log
-**/logs
-
-# OS generated files
-.DS_Store
-**/.DS_Store
-Thumbs.db
-**/Thumbs.db
-
-# IDE specific
-.idea/
-**/.idea/
+# Editors
 .vscode/
-**/.vscode/
+.idea/
 *.swp
 *.swo
-*~
 
-# Testing
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage
 coverage/
-**/coverage/
+htmlcov/
+.coverage
 
-# Temporary files
-*.tmp
-**/*.tmp
-*.temp
-**/*.temp
-
-# Mobile
-**/ios/Pods/
-**/ios/Flutter/.last_build_id
-**/macos/Pods/
-**/macos/Flutter/.last_build_id
-
-# Web
-**/web/build/
-**/web/.dart_tool/
-
-# Generated plugin code
-**/android/local.properties
-**/ios/Flutter/flutter_export_environment.sh
-**/linux/flutter/ephemeral
-**/windows/flutter/ephemeral
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
