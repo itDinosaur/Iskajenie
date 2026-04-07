@@ -4,10 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/game_model.dart';
 import '../../models/location.dart';
-import '../../data/locations_data.dart';
+import '../data/locations_data.dart';
 import '../story_screen.dart';
 import '../slot_selection_screen.dart';
 import 'location_detail_screen.dart';
@@ -96,27 +97,72 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
   }
 
   // Генерация начальной карты для компании "Мрачный бункер"
+  // По правилам: 
+  // 1. Всегда начинаем с "Металлического прохода"
+  // 2. Вторая локация всегда "Кровавый перекресток"
+  // 3. Остальные 5 локаций выбираются случайно из оставшихся
   List<Location> _generateInitialMap() {
-    // Для бункера стартовая локация всегда "Металлический проход"
-    // Создаём её программно, так как её нет в общем списке
-    
     List<Location> mapLocations = [];
     
-    // Стартовая локация
+    // 1. Стартовая локация - Металлический проход (всегда первая)
+    final startTemplate = getLocationTemplate('metal_corridor');
     mapLocations.add(Location(
-      id: 'metal_corridor',
-      name: 'Металлический проход',
-      description: 'Длинный коридор с металлическими стенами. Повсюду следы ржавчины и времени.',
-      locationType: LocationType.indoor,
+      id: startTemplate.id,
+      name: startTemplate.name,
+      description: startTemplate.description,
+      locationType: _convertLocationType(startTemplate.type),
       difficulty: 1,
-      imageUrl: 'assets/locations/corridor.png',
+      imageUrl: startTemplate.imagePath,
     ));
     
-    // Добавляем несколько случайных локаций
-    final randomLocations = getRandomLocations(5);
-    mapLocations.addAll(randomLocations);
+    // 2. Вторая обязательная локация - Кровавый перекресток (всегда вторая)
+    final crossroadTemplate = getLocationTemplate('bloody_crossroad');
+    mapLocations.add(Location(
+      id: crossroadTemplate.id,
+      name: crossroadTemplate.name,
+      description: crossroadTemplate.description,
+      locationType: _convertLocationType(crossroadTemplate.type),
+      difficulty: 2,
+      imageUrl: crossroadTemplate.imagePath,
+    ));
+    
+    // 3. Оставшиеся 5 локаций выбираем случайно из доступных
+    // Исключаем уже добавленные (metal_corridor и bloody_crossroad)
+    final availableLocations = bunkerLocations.where((loc) => 
+      loc.id != 'metal_corridor' && loc.id != 'bloody_crossroad'
+    ).toList();
+    
+    // Перемешиваем и берем первые 5
+    availableLocations.shuffle(math.Random());
+    final selectedLocations = availableLocations.take(5).toList();
+    
+    // Добавляем их на карту
+    for (var template in selectedLocations) {
+      mapLocations.add(Location(
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        locationType: _convertLocationType(template.type),
+        difficulty: template.type == LocationType.checkRequired ? 5 : 3,
+        imageUrl: template.imagePath,
+      ));
+    }
     
     return mapLocations;
+  }
+  
+  // Вспомогательный метод для преобразования типа локации
+  LocationTypeModel _convertLocationType(LocationType type) {
+    switch (type) {
+      case LocationType.start:
+      case LocationType.crossroad:
+      case LocationType.normal:
+        return LocationTypeModel.indoor;
+      case LocationType.deadEnd:
+        return LocationTypeModel.deadEnd;
+      case LocationType.checkRequired:
+        return LocationTypeModel.special;
+    }
   }
 
   // Начало игры (после предыстории)
