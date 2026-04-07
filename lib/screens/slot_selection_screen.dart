@@ -212,7 +212,7 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
           builder: (context) => GameBoardScreen(
             gameModel: GameModel(
               slotId: slot.id.toString(),
-              companyId: slot.companyId ?? '1', // Будет загружено из сохранения
+              companyId: '1', // Значение по умолчанию, будет перезаписано при загрузке сохранения
               playerCount: 1,
               difficulty: 1,
               selectedCharacterIds: [],
