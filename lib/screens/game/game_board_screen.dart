@@ -139,14 +139,6 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       _gameModel.nextPhase();
     });
     _saveGame();
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Фаза: ${_gameModel.currentPhase.displayName}'),
-        backgroundColor: Colors.deepPurple,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   // Открытие детального просмотра локации
@@ -163,6 +155,15 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       // После возврата обновляем игру
       _saveGame();
     });
+  }
+
+  // Возврат в главное меню
+  void _returnToMenu() {
+    _saveGame();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SlotSelectionScreen()),
+    );
   }
 
   @override
@@ -200,13 +201,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
           IconButton(
             icon: const Icon(Icons.menu, color: Colors.white),
             tooltip: 'В меню',
-            onPressed: () {
-              _saveGame();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const SlotSelectionScreen()),
-              );
-            },
+            onPressed: _returnToMenu,
           ),
         ],
       ),
