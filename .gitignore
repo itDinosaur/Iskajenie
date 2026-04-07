@@ -1,33 +1,62 @@
-```
 # Dependencies
 .pub/
-.build/
-.dependencies/
+.buildlog
+.flutter-plugins
+.flutter-plugin-dependencies
+.packages
 
-# Generated code
-*.g.dart
-*.freezed.dart
+# Build outputs
+build/
+**/ios/.generated/
+**/macos/.generated/
+
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
 
 # Logs
 *.log
 **/logs
 
-# Environment variables
-.env
-.env.*
-!.env.example
+# OS generated files
+.DS_Store
+**/.DS_Store
+Thumbs.db
+**/Thumbs.db
 
 # IDE specific
 .idea/
+**/.idea/
 .vscode/
+**/.vscode/
 *.swp
 *.swo
+*~
 
-# OS generated
-.DS_Store
-Thumbs.db
+# Testing
+coverage/
+**/coverage/
 
-# Build outputs
-build/
-dist/
-```
+# Temporary files
+*.tmp
+**/*.tmp
+*.temp
+**/*.temp
+
+# Mobile
+**/ios/Pods/
+**/ios/Flutter/.last_build_id
+**/macos/Pods/
+**/macos/Flutter/.last_build_id
+
+# Web
+**/web/build/
+**/web/.dart_tool/
+
+# Generated plugin code
+**/android/local.properties
+**/ios/Flutter/flutter_export_environment.sh
+**/linux/flutter/ephemeral
+**/windows/flutter/ephemeral
