@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'slot_selection_screen.dart';
+import '../models/game_model.dart';
+import 'game/game_board_screen.dart';
 
 // Модель данных для компании
 class GameCompany {
@@ -533,17 +535,20 @@ class _PartySetupScreenState extends State<PartySetupScreen> {
     // Сохранение настроек партии
     _savePartySetup();
 
-    // Переход на экран выбора слотов
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const SlotSelectionScreen()),
+    // Создаём модель игры
+    final gameModel = GameModel(
+      slotId: widget.slotId.toString(),
+      companyId: _selectedCompany!.id,
+      playerCount: _playerCount,
+      difficulty: _difficulty.index,
+      selectedCharacterIds: _selectedCharacters.whereType<String>().toList(),
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Партия "${widget.slotName}" успешно создана!'),
-        backgroundColor: Colors.green,
-      ),
+    // Переход на экран игрового поля (начнётся с предыстории)
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => GameBoardScreen(gameModel: gameModel)),
+      (route) => false, // Удаляем все предыдущие экраны из стека
     );
   }
 
