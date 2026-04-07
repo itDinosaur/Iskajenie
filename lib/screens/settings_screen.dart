@@ -197,6 +197,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('game_slots');
     
+    // Также очищаем все настройки партий
+    final keys = prefs.getKeys();
+    for (String key in keys) {
+      if (key.startsWith('party_setup_')) {
+        await prefs.remove(key);
+      }
+    }
+    
     if (mounted) {
       setState(() {});
     }
