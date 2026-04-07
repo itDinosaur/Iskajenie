@@ -1,7 +1,3 @@
-// location_detail_screen.dart - Экран детального просмотра локации
-// Этот экран открывается при клике на локацию на карте
-// Показывает описание локации и кнопки взаимодействия
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -9,6 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/game_model.dart';
 import '../../models/location.dart';
 import '../data/locations_data.dart';
+
+// Константы для локаций
+class LocationConstants {
+  static const int maxRandomLocations = 3;
+  static const int baseDifficulty = 3;
+  static const int checkRequiredDifficulty = 5;
+}
 
 class LocationDetailScreen extends StatefulWidget {
   final Location location;
@@ -26,6 +29,7 @@ class LocationDetailScreen extends StatefulWidget {
 
 class _LocationDetailScreenState extends State<LocationDetailScreen> {
   late GameModel _gameModel;
+  bool _isLoading = false;
   
   // Геттер для удобного доступа к локации из виджета
   Location get location => widget.location;
@@ -36,13 +40,24 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
     _gameModel = widget.gameModel;
   }
 
-  // Сохранение игры
+  // Сохранение игры с обработкой ошибок
   Future<void> _saveGame() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      'game_save_${_gameModel.slotId}',
-      json.encode(_gameModel.toJson()),
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'game_save_${_gameModel.slotId}',
+        json.encode(_gameModel.toJson()),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка сохранения: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -448,7 +463,9 @@ class _LocationDetailScreenState extends State<LocationDetailScreen> {
         name: template.name,
         description: template.description,
         locationType: LocationType.underground,
-        difficulty: template.type == 'checkRequired' ? 5 : 3,
+        difficulty: template.type == 'checkRequired' 
+            ? LocationConstants.checkRequiredDifficulty 
+            : LocationConstants.baseDifficulty,
         imageUrl: template.imagePath ?? '', // Если картинки нет, пустая строка
       );
       

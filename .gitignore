@@ -1,1 +1,50 @@
-Nothing should be ignored since the changes only include source code files (.dart files) and no build artifacts, dependencies, or temporary files.
+```
+# Build artifacts
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.out
+
+# Dependencies
+**/node_modules/
+**/.venv/
+**/venv/
+**/__pycache__/
+**/.mypy_cache/
+**/.pytest_cache/
+**/.gradle/
+**/target/
+**/build/
+**/dist/
+**/vendor/
+
+# Flutter/Dart specific
+.dart_tool/
+.packages
+*.g.dart
+*.freezed.dart
+*.config.dart
+
+# Logs
+*.log
+**/logs/
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```

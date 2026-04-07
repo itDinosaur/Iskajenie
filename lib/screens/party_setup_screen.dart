@@ -5,6 +5,13 @@ import 'slot_selection_screen.dart';
 import '../models/game_model.dart';
 import 'game/game_board_screen.dart';
 
+// Константы для настройки партии
+class PartyConstants {
+  static const int minPlayers = 1;
+  static const int maxPlayers = 4;
+  static const int defaultPlayerCount = 1;
+}
+
 // Модель данных для компании
 class GameCompany {
   final String id;
@@ -552,40 +559,52 @@ class _PartySetupScreenState extends State<PartySetupScreen> {
     );
   }
 
+  // Сохранение настроек партии с обработкой ошибок
   Future<void> _savePartySetup() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // Создаём объект настроек партии
-    final partySetup = PartySetup(
-      slotId: widget.slotId.toString(),
-      companyId: _selectedCompany!.id,
-      playerCount: _playerCount,
-      difficulty: _difficulty,
-      selectedCharacterIds: List.from(_selectedCharacters),
-    );
-
-    // Сохраняем настройки партии
-    await prefs.setString(
-      'party_setup_${widget.slotId}',
-      json.encode(partySetup.toJson()),
-    );
-
-    // Обновляем информацию о слоте
-    final slotsJson = prefs.getString('game_slots');
-    if (slotsJson != null) {
-      final List<dynamic> decoded = json.decode(slotsJson);
-      final List<GameSlot> slots = decoded.map((slot) => GameSlot.fromJson(slot)).toList();
+    try {
+      final prefs = await SharedPreferences.getInstance();
       
-      // Находим нужный слот и обновляем его
-      for (int i = 0; i < slots.length; i++) {
-        if (slots[i].id == widget.slotId) {
-          // Можно добавить дополнительную информацию в saveName
-          slots[i].saveName = '${widget.slotName} (${_selectedCompany!.name})';
-          break;
+      // Создаём объект настроек партии
+      final partySetup = PartySetup(
+        slotId: widget.slotId.toString(),
+        companyId: _selectedCompany!.id,
+        playerCount: _playerCount,
+        difficulty: _difficulty,
+        selectedCharacterIds: List.from(_selectedCharacters),
+      );
+
+      // Сохраняем настройки партии
+      await prefs.setString(
+        'party_setup_${widget.slotId}',
+        json.encode(partySetup.toJson()),
+      );
+
+      // Обновляем информацию о слоте
+      final slotsJson = prefs.getString('game_slots');
+      if (slotsJson != null) {
+        final List<dynamic> decoded = json.decode(slotsJson);
+        final List<GameSlot> slots = decoded.map((slot) => GameSlot.fromJson(slot)).toList();
+        
+        // Находим нужный слот и обновляем его
+        for (int i = 0; i < slots.length; i++) {
+          if (slots[i].id == widget.slotId) {
+            // Можно добавить дополнительную информацию в saveName
+            slots[i].saveName = '${widget.slotName} (${_selectedCompany!.name})';
+            break;
+          }
         }
+        
+        await prefs.setString('game_slots', json.encode(slots.map((s) => s.toJson()).toList()));
       }
-      
-      await prefs.setString('game_slots', json.encode(slots.map((s) => s.toJson()).toList()));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка сохранения настроек: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

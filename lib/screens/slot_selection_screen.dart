@@ -53,39 +53,76 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
     _loadSlots();
   }
 
-  // Загрузка слотов из памяти
+  // Загрузка слотов из памяти с обработкой ошибок
   Future<void> _loadSlots() async {
-    final prefs = await SharedPreferences.getInstance();
-    final slotsJson = prefs.getString('game_slots');
-    
-    if (slotsJson != null) {
-      final List<dynamic> decoded = json.decode(slotsJson);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final slotsJson = prefs.getString('game_slots');
+      
+      if (slotsJson != null) {
+        final List<dynamic> decoded = json.decode(slotsJson);
+        setState(() {
+          _slots = decoded.map((slot) => GameSlot.fromJson(slot)).toList();
+        });
+      } else {
+        // Если сохранений нет, создаем пустые слоты
+        setState(() {
+          _slots = List.generate(GameConstants.totalSlots, (index) => GameSlot(id: index + 1));
+          _saveSlots();
+        });
+      }
+    } catch (e) {
+      // При ошибке создаем слоты по умолчанию
       setState(() {
-        _slots = decoded.map((slot) => GameSlot.fromJson(slot)).toList();
+        _slots = List.generate(GameConstants.totalSlots, (index) => GameSlot(id: index + 1));
       });
-    } else {
-      // Если сохранений нет, создаем пустые слоты
-      setState(() {
-        _slots = List.generate(10, (index) => GameSlot(id: index + 1));
-        _saveSlots();
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка загрузки слотов: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
-  // Сохранение слотов в память
+  // Сохранение слотов в память с обработкой ошибок
   Future<void> _saveSlots() async {
-    final prefs = await SharedPreferences.getInstance();
-    final slotsJson = json.encode(_slots.map((slot) => slot.toJson()).toList());
-    await prefs.setString('game_slots', slotsJson);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final slotsJson = json.encode(_slots.map((slot) => slot.toJson()).toList());
+      await prefs.setString('game_slots', slotsJson);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка сохранения слотов: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  // Очистка всех слотов
+  // Очистка всех слотов с обработкой ошибок
   Future<void> _clearAllSlots() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('game_slots');
-    setState(() {
-      _slots = List.generate(10, (index) => GameSlot(id: index + 1));
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('game_slots');
+      setState(() {
+        _slots = List.generate(GameConstants.totalSlots, (index) => GameSlot(id: index + 1));
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка очистки слотов: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   // Диалог подтверждения очистки всех слотов
@@ -202,24 +239,53 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
     );
   }
 
-  void _handleSlotTap(GameSlot slot) {
+  void _handleSlotTap(GameSlot slot) async {
     if (slot.isOccupied) {
-      // Если слот занят, загружаем партию
-      // Переход к экрану игры с загрузкой сохранения
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GameBoardScreen(
-            gameModel: GameModel(
-              slotId: slot.id.toString(),
-              companyId: '1', // Значение по умолчанию, будет перезаписано при загрузке сохранения
-              playerCount: 1,
-              difficulty: 1,
-              selectedCharacterIds: [],
+      // Если слот занят, сначала загружаем сохранение для получения реальных данных
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final gameJson = prefs.getString('game_save_${slot.id}');
+        
+        if (gameJson != null) {
+          // Загружаем реальную модель игры из сохранения
+          final gameModel = GameModel.fromJson(json.decode(gameJson));
+          
+          // Переход к экрану игры с загруженным сохранением
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameBoardScreen(gameModel: gameModel),
+              ),
+            );
+          }
+        } else {
+          // Если файл сохранения не найден, помечаем слот как свободный
+          setState(() {
+            slot.isOccupied = false;
+            slot.saveName = null;
+          });
+          await _saveSlots();
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Сохранение не найдено. Слот очищен.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Ошибка загрузки сохранения: $e'),
+              backgroundColor: Colors.red,
             ),
-          ),
-        ),
-      );
+          );
+        }
+      }
     } else {
       // Если слот свободен, просим ввести имя
       _showCreateGameDialog(slot);
