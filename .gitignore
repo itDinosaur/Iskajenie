@@ -1,28 +1,24 @@
 ```
 # Dependencies
 .pub/
-.build/
-.dart_tool/
+.buildlog
+.flutter-plugins
+.flutter-plugin-dependencies
+.packages
 
-# Logs
-*.log
+# Build outputs
+build/
+.dart_tool/
 
 # Environment
 .env
 .env.local
 *.env.*
 
+# Logs
+*.log
+
 # OS generated files
 .DS_Store
 Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Build artifacts
-build/
-dist/
 ```
