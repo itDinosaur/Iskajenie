@@ -7,7 +7,7 @@
 # Logs
 *.log
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
@@ -16,15 +16,13 @@
 .DS_Store
 Thumbs.db
 
-# IDE specific
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# Build outputs
+# Build artifacts
 build/
 dist/
-target/
 ```
