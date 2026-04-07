@@ -13,6 +13,13 @@ import '../story_screen.dart';
 import '../slot_selection_screen.dart';
 import 'location_detail_screen.dart';
 
+// Константы для избежания магических чисел
+class GameConstants {
+  static const int maxPlayers = 4;
+  static const int totalSlots = 10;
+  static const int initialDifficulty = 1;
+}
+
 class GameBoardScreen extends StatefulWidget {
   final GameModel gameModel;
 
@@ -25,63 +32,115 @@ class GameBoardScreen extends StatefulWidget {
 class _GameBoardScreenState extends State<GameBoardScreen> {
   late GameModel _gameModel;
   bool _isInitialized = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     // Откладываем инициализацию до завершения сборки виджета
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeGame();
+      if (mounted) {
+        _initializeGame();
+      }
     });
   }
 
-  // Инициализация игры
+  // Инициализация игры с обработкой ошибок
   Future<void> _initializeGame() async {
-    // Проверяем, есть ли сохранение для этого слота
-    final prefs = await SharedPreferences.getInstance();
-    final gameJson = prefs.getString('game_save_${widget.gameModel.slotId}');
-    
-    if (gameJson != null) {
-      // Есть сохранение - загружаем игру без предыстории
-      await _loadGame();
-    } else {
-      // Нет сохранения - новая игра, показываем предысторию
-      _showStory();
+    try {
+      // Проверяем, есть ли сохранение для этого слота
+      final prefs = await SharedPreferences.getInstance();
+      final gameJson = prefs.getString('game_save_${widget.gameModel.slotId}');
+      
+      if (gameJson != null) {
+        // Есть сохранение - загружаем игру без предыстории
+        await _loadGame();
+      } else {
+        // Нет сохранения - новая игра, показываем предысторию
+        if (mounted) {
+          _showStory();
+        }
+      }
+      
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Ошибка инициализации игры: $e';
+          _isInitialized = true;
+        });
+      }
     }
-    
-    setState(() {
-      _isInitialized = true;
-    });
   }
 
-  // Загрузка сохранённой игры
+  // Загрузка сохранённой игры с обработкой ошибок
   Future<void> _loadGame() async {
-    final prefs = await SharedPreferences.getInstance();
-    final gameJson = prefs.getString('game_save_${widget.gameModel.slotId}');
-    
-    if (gameJson != null) {
-      setState(() {
-        _gameModel = GameModel.fromJson(json.decode(gameJson));
-      });
-    } else {
-      // Если сохранения нет, используем модель из виджета
-      setState(() {
-        _gameModel = widget.gameModel;
-      });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final gameJson = prefs.getString('game_save_${widget.gameModel.slotId}');
+      
+      if (gameJson != null) {
+        final decoded = json.decode(gameJson);
+        final loadedGameModel = GameModel.fromJson(decoded);
+        
+        if (mounted) {
+          setState(() {
+            _gameModel = loadedGameModel;
+          });
+        }
+      } else {
+        // Если сохранения нет, используем модель из виджета
+        if (mounted) {
+          setState(() {
+            _gameModel = widget.gameModel;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка загрузки сохранения: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // Используем модель из виджета как fallback
+        setState(() {
+          _gameModel = widget.gameModel;
+        });
+      }
     }
   }
 
-  // Сохранение игры
+  // Сохранение игры с обработкой ошибок
   Future<void> _saveGame() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      'game_save_${_gameModel.slotId}',
-      json.encode(_gameModel.toJson()),
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        'game_save_${_gameModel.slotId}',
+        json.encode(_gameModel.toJson()),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка сохранения: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
   }
 
-  // Показ экрана предыстории
+  // Показ экрана предыстории с защитой от повторного вызова
   void _showStory() {
+    // Проверяем, что виджет ещё активен и игра ещё не инициализирована
+    if (!mounted || _isInitialized) return;
+    
     // Используем push вместо pushReplacement, чтобы можно было вернуться
     Navigator.push(
       context,
@@ -89,8 +148,8 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
         builder: (context) => StoryScreen(gameModel: widget.gameModel),
       ),
     ).then((_) {
-      // Когда история закрыта, начинаем игру
-      if (mounted) {
+      // Когда история закрыта, начинаем игру только если виджет активен
+      if (mounted && !_isInitialized) {
         startGame();
       }
     });
@@ -187,6 +246,84 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Показываем экран ошибки если она произошла
+    if (_errorMessage != null) {
+      return Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.deepPurple.shade900,
+                Colors.black,
+                Colors.deepPurple.shade800,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Ошибка',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purpleAccent,
+                      foregroundColor: Colors.black,
+                    ),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Попробовать снова'),
+                    onPressed: () {
+                      setState(() {
+                        _errorMessage = null;
+                        _isInitialized = false;
+                      });
+                      _initializeGame();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white24),
+                    ),
+                    icon: const Icon(Icons.home),
+                    label: const Text('В главное меню'),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SlotSelectionScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     if (!_isInitialized) {
       return const Scaffold(
         body: Center(
