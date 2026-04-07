@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart'; // Подключаем библиотеку Flutter для создания интерфейса
 import '../widgets/menu_button.dart'; // Подключаем наш виджет красивой кнопки
+import 'slot_selection_screen.dart'; // Подключаем экран выбора слотов
 // В будущем здесь будут импорты других экранов:
 // import 'characters_screen.dart';
 // import 'settings_screen.dart';
-// import 'setup_screen.dart';
 
 // MainMenuScreen - это виджет главного меню
 // Используем StatefulWidget, потому что меню может меняться (например, показывать разные состояния)
@@ -186,18 +186,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
   // Функция навигации на экран настройки партии
   void _navigateToSetup() {
-    // Navigator.pushNamed - переход на другой экран по имени
-    // Пока просто выводим сообщение, так как экран ещё не создан
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Экран настройки партии будет следующим!'),
-        backgroundColor: Colors.deepPurple,
-        duration: Duration(seconds: 2),
-      ),
+    // Переходим на экран выбора слотов
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SlotSelectionScreen()),
     );
-    
-    // В будущем раскомментируем эту строку для перехода:
-    // Navigator.pushNamed(context, '/setup');
   }
 
   // Функция навигации на экран персонажей
