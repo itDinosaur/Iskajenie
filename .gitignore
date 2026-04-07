@@ -1,0 +1,34 @@
+```
+# Dart/Flutter build artifacts
+/build/
+/dist/
+*.dart.js
+*.map
+*.part.js
+*.g.dart
+*.freezed.dart
+*.gr.dart
+
+# Dependencies
+.pub-cache/
+.dart_tool/
+
+# Logs
+*.log
+**/logs
+
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
