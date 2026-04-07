@@ -144,7 +144,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
         description: template.description,
         locationType: _convertLocationType(template.type),
         difficulty: template.type == 'checkRequired' ? 5 : 3,
-        imageUrl: template.imagePath,
+        imageUrl: template.imagePath ?? '',
       ));
     }
     
