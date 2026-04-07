@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'party_setup_screen.dart';
 
 // Модель данных для слота сохранения
 class GameSlot {
@@ -64,11 +65,6 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
       // Если сохранений нет, создаем пустые слоты
       setState(() {
         _slots = List.generate(10, (index) => GameSlot(id: index + 1));
-        // Для демонстрации займем пару слотов
-        _slots[0].isOccupied = true;
-        _slots[0].saveName = "Партия: Начало пути";
-        _slots[3].isOccupied = true;
-        _slots[3].saveName = "Партия: Подземелье";
         _saveSlots();
       });
     }
@@ -199,15 +195,14 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
 
   void _handleSlotTap(GameSlot slot) {
     if (slot.isOccupied) {
-      // Если слот занят, сразу переходим к настройке (пока заглушка)
-      // В будущем здесь будет переход на экран настройки конкретной партии
+      // Если слот занят, загружаем партию
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Загрузка партии: ${slot.saveName}'),
           backgroundColor: Colors.green,
         ),
       );
-      // Navigator.push(...) - переход к экрану настройки партии
+      // В будущем здесь будет переход к экрану игры
     } else {
       // Если слот свободен, просим ввести имя
       _showCreateGameDialog(slot);
@@ -265,13 +260,15 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
                 Navigator.pop(context);
                 
                 // Переход к настройке новой партии
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Слот ${slot.id} создан: ${slot.saveName}'),
-                    backgroundColor: Colors.green,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartySetupScreen(
+                      slotId: slot.id,
+                      slotName: slot.saveName!,
+                    ),
                   ),
                 );
-                // Navigator.push(...) - переход к экрану настройки
               }
             },
             child: const Text('Создать'),
