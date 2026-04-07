@@ -1,44 +1,58 @@
-```
-# Build artifacts
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
 # Dependencies
-node_modules/
-venv/
-.venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-target/
-.gradle/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# System files
-.DS_Store
-Thumbs.db
-.env
-.env.local
-*.env.*
+.pub/
+.build/
+.dart_tool/
 
 # Logs
 *.log
 
-# Coverage
+# Environment
+.env
+.env.local
+*.env.*
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+build/
+dist/
+target/
+
+# Python related (if any Python files exist in project)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Node related (if any JS/TS files exist in project)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
 coverage/
-htmlcov/
-.coverage
+*.lcov
+*.profdata
+*.coverage
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.DS_Store
 
 # Compressed files
 *.zip
@@ -63,4 +77,3 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
