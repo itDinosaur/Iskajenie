@@ -37,7 +37,7 @@ const List<LocationTemplate> bunkerLocations = [
     name: 'Металлический проход',
     description: 'Длинный коридор с металлическими стенами. Слышен гул вентиляции.',
     type: 'start',
-    icon: Icons.tunnel,
+    icon: Icons.subway, // Используем доступную иконку метро/тоннеля
     imagePath: 'assets/images/metal_corridor.png', // Место под будущую картинку
   ),
 

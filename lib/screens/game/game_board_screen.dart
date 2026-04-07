@@ -112,7 +112,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       description: startTemplate.description,
       locationType: _convertLocationType(startTemplate.type),
       difficulty: 1,
-      imageUrl: startTemplate.imagePath,
+      imageUrl: startTemplate.imagePath ?? '',
     ));
     
     // 2. Вторая обязательная локация - Кровавый перекресток (всегда вторая)
@@ -123,7 +123,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
       description: crossroadTemplate.description,
       locationType: _convertLocationType(crossroadTemplate.type),
       difficulty: 2,
-      imageUrl: crossroadTemplate.imagePath,
+      imageUrl: crossroadTemplate.imagePath ?? '',
     ));
     
     // 3. Оставшиеся 5 локаций выбираем случайно из доступных
@@ -143,7 +143,7 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
         name: template.name,
         description: template.description,
         locationType: _convertLocationType(template.type),
-        difficulty: template.type == LocationType.checkRequired ? 5 : 3,
+        difficulty: template.type == 'checkRequired' ? 5 : 3,
         imageUrl: template.imagePath,
       ));
     }
