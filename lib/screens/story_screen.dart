@@ -130,13 +130,9 @@ class StoryScreen extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      // Переходим на игровое поле
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GameBoardScreen(gameModel: gameModel),
-                        ),
-                      );
+                      // Просто закрываем экран истории, возвращаясь назад
+                      // Игра начнётся автоматически в GameBoardScreen после возврата
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       'ПРОДОЛЖИТЬ',
