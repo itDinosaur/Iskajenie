@@ -28,7 +28,10 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeGame();
+    // Откладываем инициализацию до завершения сборки виджета
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeGame();
+    });
   }
 
   // Инициализация игры
