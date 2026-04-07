@@ -151,17 +151,19 @@ class _GameBoardScreenState extends State<GameBoardScreen> {
     return mapLocations;
   }
   
-  // Вспомогательный метод для преобразования типа локации
-  LocationTypeModel _convertLocationType(LocationType type) {
+  // Вспомогательный метод для преобразования типа локации из строки в LocationType
+  LocationType _convertLocationType(String type) {
     switch (type) {
-      case LocationType.start:
-      case LocationType.crossroad:
-      case LocationType.normal:
-        return LocationTypeModel.indoor;
-      case LocationType.deadEnd:
-        return LocationTypeModel.deadEnd;
-      case LocationType.checkRequired:
-        return LocationTypeModel.special;
+      case 'start':
+      case 'crossroad':
+      case 'normal':
+        return LocationType.underground; // Все локации бункера - подземные
+      case 'deadEnd':
+        return LocationType.underground;
+      case 'checkRequired':
+        return LocationType.underground;
+      default:
+        return LocationType.underground;
     }
   }
 
