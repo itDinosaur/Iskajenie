@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/game_model.dart';
-import '../models/location.dart';
-import '../data/locations_data.dart';
-import 'story_screen.dart';
-import 'slot_selection_screen.dart';
+import '../../models/game_model.dart';
+import '../../models/location.dart';
+import '../../data/locations_data.dart';
+import '../story_screen.dart';
+import '../slot_selection_screen.dart';
 import 'location_detail_screen.dart';
 
 class GameBoardScreen extends StatefulWidget {

@@ -3,8 +3,8 @@
 // Показывает описание локации и кнопки взаимодействия
 
 import 'package:flutter/material.dart';
-import '../models/game_model.dart';
-import '../models/location.dart';
+import '../../models/game_model.dart';
+import '../../models/location.dart';
 
 class LocationDetailScreen extends StatelessWidget {
   final Location location;
