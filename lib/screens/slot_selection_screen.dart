@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Модель данных для слота сохранения
 class GameSlot {
@@ -11,6 +13,24 @@ class GameSlot {
     this.saveName,
     this.isOccupied = false,
   });
+
+  // Преобразование в JSON для сохранения
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'saveName': saveName,
+      'isOccupied': isOccupied,
+    };
+  }
+
+  // Создание из JSON при загрузке
+  factory GameSlot.fromJson(Map<String, dynamic> json) {
+    return GameSlot(
+      id: json['id'],
+      saveName: json['saveName'],
+      isOccupied: json['isOccupied'] ?? false,
+    );
+  }
 }
 
 class SlotSelectionScreen extends StatefulWidget {
@@ -21,22 +41,92 @@ class SlotSelectionScreen extends StatefulWidget {
 }
 
 class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
-  // Имитация базы данных сохранений
-  // В реальном проекте это будет загружаться из файла или БД
-  final List<GameSlot> _slots = List.generate(
-    10,
-    (index) => GameSlot(id: index + 1),
-  );
+  // Список слотов
+  List<GameSlot> _slots = [];
 
   @override
   void initState() {
     super.initState();
-    // Для демонстрации займем пару слотов
-    _slots[0].isOccupied = true;
-    _slots[0].saveName = "Партия: Начало пути";
+    _loadSlots();
+  }
+
+  // Загрузка слотов из памяти
+  Future<void> _loadSlots() async {
+    final prefs = await SharedPreferences.getInstance();
+    final slotsJson = prefs.getString('game_slots');
     
-    _slots[3].isOccupied = true;
-    _slots[3].saveName = "Партия: Подземелье";
+    if (slotsJson != null) {
+      final List<dynamic> decoded = json.decode(slotsJson);
+      setState(() {
+        _slots = decoded.map((slot) => GameSlot.fromJson(slot)).toList();
+      });
+    } else {
+      // Если сохранений нет, создаем пустые слоты
+      setState(() {
+        _slots = List.generate(10, (index) => GameSlot(id: index + 1));
+        // Для демонстрации займем пару слотов
+        _slots[0].isOccupied = true;
+        _slots[0].saveName = "Партия: Начало пути";
+        _slots[3].isOccupied = true;
+        _slots[3].saveName = "Партия: Подземелье";
+        _saveSlots();
+      });
+    }
+  }
+
+  // Сохранение слотов в память
+  Future<void> _saveSlots() async {
+    final prefs = await SharedPreferences.getInstance();
+    final slotsJson = json.encode(_slots.map((slot) => slot.toJson()).toList());
+    await prefs.setString('game_slots', slotsJson);
+  }
+
+  // Очистка всех слотов
+  Future<void> _clearAllSlots() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('game_slots');
+    setState(() {
+      _slots = List.generate(10, (index) => GameSlot(id: index + 1));
+    });
+  }
+
+  // Диалог подтверждения очистки всех слотов
+  void _showClearConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey.shade800,
+        title: const Text('Очистить все сохранения', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Вы уверены, что хотите удалить все сохранения? Это действие нельзя отменить.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () async {
+              await _clearAllSlots();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Все сохранения удалены'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            },
+            child: const Text('Удалить'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -47,6 +137,14 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          // Кнопка очистки всех сохранений
+          IconButton(
+            icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+            tooltip: 'Очистить все сохранения',
+            onPressed: () => _showClearConfirmDialog(),
+          ),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -157,12 +255,13 @@ class _SlotSelectionScreenState extends State<SlotSelectionScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () {
+            onPressed: () async {
               if (_controller.text.isNotEmpty) {
                 setState(() {
                   slot.saveName = _controller.text;
                   slot.isOccupied = true;
                 });
+                await _saveSlots(); // Сохраняем слоты
                 Navigator.pop(context);
                 
                 // Переход к настройке новой партии
